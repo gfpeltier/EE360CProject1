@@ -8,8 +8,15 @@ public class Tic {
 		private int weight;
 		
 		//Constructors
-		
+		public Tic(int Tid, int Tmin, int Tmax, int Tweight){
+			id = Tid;
+			min = Tmin;
+			max = Tmax;
+			weight = Tweight;
+		}
 		
 		//Getters & Setters
-	
+		public int getId(){
+			return id;
+		}
 }

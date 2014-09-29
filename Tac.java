@@ -6,7 +6,17 @@ public class Tac {
 	private int weight;
 	
 	//Constructors
-			
+	public Tac(int Tid, int Tweight){
+		id = Tid;
+		weight = Tweight;
+	}
 			
 	//Getters & Setters
+	public int getId(){
+		return id;
+	}
+	
+	public int getWeight(){
+		return weight;
+	}
 }
