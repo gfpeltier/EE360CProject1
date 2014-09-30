@@ -8,23 +8,23 @@ package Assignment1_360C;
 public class Edge {
 	
 	//attributes
-	private int tic;
-	private int tac;
+	private Tic tic;
+	private Tac tac;
 	private int weight;
 	
 	//constructors
-	public Edge(int ticID, int tacID, int edgeWeight){
+	public Edge(Tic ticID, Tac tacID, int edgeWeight){
 		tic = ticID;
 		tac = tacID;
 		weight = edgeWeight;
 	}
 	
 	//methods
-	public int getTic(){
+	public Tic getTic(){
 		return tic;
 	}
 	
-	public int getTac(){
+	public Tac getTac(){
 		return tac;
 	}
 	

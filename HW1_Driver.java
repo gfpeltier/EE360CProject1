@@ -176,7 +176,7 @@ public class HW1_Driver {
 			ArrayList<Edge> possibles = new ArrayList<Edge>();
 			for(int i = 0; i < tacs.length; i++){
 				if((tacs[i].getId() <= currTic.getMax()) && (tacs[i].getId() >= currTic.getMin())){
-					possibles.add(new Edge(currTic.getId(),tacs[i].getId(),(currTic.getWeight()+tacs[i].getWeight())));
+					possibles.add(new Edge(currTic, tacs[i], (currTic.getWeight()+tacs[i].getWeight())));
 				}
 			}
 			currTic.setPossibleConnect(possibles);
