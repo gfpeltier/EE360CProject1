@@ -1,3 +1,8 @@
+/**
+ * @author Grant Peltier (gfp237)
+ * Main Driver class for EE360C HW1 Fall 2014
+ */
+
 package Assignment1_360C;
 
 import java.io.BufferedReader;
@@ -7,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 
@@ -19,13 +25,15 @@ public class HW1_Driver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length != 2) 
+		if (args.length != 1) 
 		{
 			System.err.println ("Error: Incorrect number of command line arguments");
 			System.exit(-1);
 		}
 		File input = new File(args[0]);
-		File output = new File(args[1]);
+		String outName = args[0].substring(0, args[0].indexOf('.'));
+		outName += ".out";
+		File output = new File(outName);
 		
 		try{
 			BufferedReader plain = new BufferedReader(new FileReader(input));
@@ -51,9 +59,9 @@ public class HW1_Driver {
 				for(int k = 0; k < tacCount; k++){
 					GraphTacs[k] = parseTac(plain.readLine());
 				}
-				String[] out = findMatchings(GraphTics, GraphTacs);
-				for(int k = 0; k < out.length; k++){
-					writer.write(out[k]);
+				ArrayList<String> out = findMatchings(GraphTics, GraphTacs);
+				for(int k = 0; k < out.size(); k++){
+					writer.write(out.get(k));
 					writer.write("\n");
 				}
 
@@ -135,19 +143,45 @@ public class HW1_Driver {
 	}
 	
 	
-	public static String[] findMatchings(Tic[] tics, Tac[] tacs){
-		String[] output = new String[(tics.length + tacs.length)];
-		for(int k = 0; k < tics.length; k++){
-			output[k] = Integer.toString(tics[k].getId());
-		}
-		
-		for(int k = 0; k < tacs.length; k++){
-			output[k+tics.length] = Integer.toString(tacs[k].getId());
+	public static ArrayList<String> findMatchings(Tic[] tics, Tac[] tacs){
+		ArrayList<String> output = new ArrayList<String>();
+		int maxCard = getMaxCard(tics, tacs);
+		if(maxCard < 0){
+			System.out.println("ERROR: Could not determine max cardinality");
 		}
 		
 		return output;
 	}
 	
+	
+	public static int minElements(Tic[] tics, Tac[] tacs){
+		if(tics.length  < tacs.length){
+			return tics.length;
+		}else{return tacs.length;}
+	}
+	
+	public static int getMaxCard(Tic[] tics, Tac[] tacs){
+		int max = -1;
+		int absMax = minElements(tics,tacs);
+		determineConnections(tics, tacs);	//Finds all possible edges within graph
+		
+		if(max <= absMax){
+			return max;
+		}else{return -1;}
+	}
+	
+	public static void determineConnections(Tic[] tics, Tac[] tacs){
+		for(int k = 0; k < tics.length; k++){
+			Tic currTic = tics[k];
+			ArrayList<Edge> possibles = new ArrayList<Edge>();
+			for(int i = 0; i < tacs.length; i++){
+				if((tacs[i].getId() <= currTic.getMax()) && (tacs[i].getId() >= currTic.getMin())){
+					possibles.add(new Edge(currTic.getId(),tacs[i].getId(),(currTic.getWeight()+tacs[i].getWeight())));
+				}
+			}
+			currTic.setPossibleConnect(possibles);
+		}
+	}
 	
 
 }
