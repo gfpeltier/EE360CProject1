@@ -13,6 +13,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 
 
 
@@ -60,6 +63,14 @@ public class HW1_Driver {
 					GraphTacs[k] = parseTac(plain.readLine());
 				}
 				ArrayList<String> out = findMatchings(GraphTics, GraphTacs);
+				String tmp = out.get(0);
+				out.remove(0);
+				Collections.sort(out, new Comparator<String>(){
+					public int compare(String p1, String p2){
+						return p1.compareTo(p2);
+					}
+				});
+				out.add(0,tmp);
 				for(int k = 0; k < out.size(); k++){
 					writer.write(out.get(k));
 					writer.write("\n");
@@ -144,13 +155,34 @@ public class HW1_Driver {
 	
 	
 	public static ArrayList<String> findMatchings(Tic[] tics, Tac[] tacs){
-		ArrayList<String> output = new ArrayList<String>();
-		int maxCard = getMaxCard(tics, tacs);
-		if(maxCard < 0){
-			System.out.println("ERROR: Could not determine max cardinality");
+		determineConnections(tics, tacs);	//Finds all possible edges within graph
+		ArrayList<MCMGraph> matchings = getMatchings(tics, tacs);
+		return destroyDuplicates(renderOutput(matchings));
+	}
+	
+	
+	public static ArrayList<String> renderOutput(ArrayList<MCMGraph> graphs){
+		ArrayList<String> out = new ArrayList<String>();
+		out.add(graphs.size() + "");
+		for(int k = 0; k < graphs.size(); k++){
+			ArrayList<String> graphEdges = new ArrayList<String>();
+			for(int i = 0; i < graphs.get(k).currentEdges().size(); i++){
+				Edge tmp = graphs.get(k).currentEdges().get(i);
+				graphEdges.add(tmp.getTic().getId()+":"+tmp.getTac().getId());   //need to determine a way to sort the edges lexicographically
+				
+			}
+//			Collections.sort(graphEdges, new Comparator<String>(){
+//				public int compare(String p1, String p2){
+//					return p1.substring(':').compareTo(p2.substring(':'));
+//				}
+//			});
+			String actual = new String();
+			for(int i = 0; i < graphEdges.size(); i++){
+				actual += graphEdges.get(i)+" ";
+			}
+			out.add(actual);
 		}
-		
-		return output;
+		return out;
 	}
 	
 	
@@ -160,14 +192,87 @@ public class HW1_Driver {
 		}else{return tacs.length;}
 	}
 	
-	public static int getMaxCard(Tic[] tics, Tac[] tacs){
-		int max = -1;
-		int absMax = minElements(tics,tacs);
-		determineConnections(tics, tacs);	//Finds all possible edges within graph
+	public static ArrayList<MCMGraph> getMatchings(Tic[] tics, Tac[] tacs){
+		ArrayList<MCMGraph> matchings = new ArrayList<MCMGraph>();
+		MCMGraph mcmBase = new MCMGraph(tics, tacs);
+		matchings = recMatchFinder(mcmBase, matchings);
+		matchings = getMWMCMs(matchings);
+		return matchings;
+	}
+	
+	
+	public static ArrayList<String> destroyDuplicates(ArrayList<String> matches){
+		Iterator<String> it = matches.iterator();
+		ArrayList<String> actual = new ArrayList<String>();
+		while(it.hasNext()){
+			String nextGraph = it.next();
+			if(actual.isEmpty()){
+				actual.add(nextGraph);
+			}else{
+				int diffCounter = 0;
+				for(int k = 0; k < actual.size(); k++){
+					if(actual.get(k).equals(nextGraph)){
+						diffCounter++;
+					}
+				}
+				if(diffCounter == 0){
+					actual.add(nextGraph);
+				}
+			}
+			
+		}
+		actual.set(0,(actual.size()-1)+"");
+		return actual;
+	}
+	
+	
+	public static ArrayList<MCMGraph> getMWMCMs(ArrayList<MCMGraph> matches){
+		ArrayList<MCMGraph> mcm = new ArrayList<MCMGraph>();
+		int maxCard = 0;
+		int maxWeight = 0;
+		for(int k = 0; k < matches.size(); k++){
+			if(maxCard < matches.get(k).getCard()){
+				maxCard = matches.get(k).getCard();
+				maxWeight = matches.get(k).getWeight();
+			}
+		}
+		Iterator<MCMGraph> it = matches.iterator();
+		while(it.hasNext()){
+			MCMGraph nextGraph = it.next();
+			if(nextGraph.getCard() != maxCard){
+				it.remove();
+			}else if(nextGraph.getWeight() < maxWeight){
+				it.remove();
+			}else if(nextGraph.getWeight() > maxWeight){
+				maxWeight = nextGraph.getWeight();
+			}
+		}
 		
-		if(max <= absMax){
-			return max;
-		}else{return -1;}
+		Iterator<MCMGraph> it2 = matches.iterator();
+		while(it2.hasNext()){
+			MCMGraph nextGraph = it2.next();
+			if(nextGraph.getWeight() < maxWeight){
+				it2.remove();
+			}
+		}
+		return matches;
+	}
+	
+	public static ArrayList<MCMGraph> recMatchFinder(MCMGraph graph, ArrayList<MCMGraph> list){
+		if(graph.getPossibleEdges().isEmpty() && !list.contains(graph)){
+			graph.reorganize();
+			list.add(graph); 
+			return list;
+		}
+		if(graph.getPossibleEdges().isEmpty() && list.contains(graph)){ return list;}
+		for(int k = 0; k < graph.getPossibleEdges().size(); k++){
+			MCMGraph newGraph = new MCMGraph(graph);
+			newGraph.addEdge(newGraph.getPossibleEdges().get(k));
+			list = recMatchFinder(newGraph, list);
+		}
+		
+		return list;
+		
 	}
 	
 	public static void determineConnections(Tic[] tics, Tac[] tacs){

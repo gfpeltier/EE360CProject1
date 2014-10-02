@@ -15,7 +15,7 @@ public class Tac {
 		id = Tid;
 		weight = Tweight;
 	}
-			
+	
 	//Getters & Setters
 	public int getId(){
 		return id;

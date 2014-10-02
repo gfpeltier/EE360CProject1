@@ -24,6 +24,8 @@ public class Tic {
 		}
 		
 		//Getters & Setters
+		
+		
 		public int getId(){
 			return id;
 		}
@@ -38,6 +40,10 @@ public class Tic {
 		
 		public int getWeight(){
 			return weight;
+		}
+		
+		public ArrayList<Edge> getPossibleConnect(){
+			return possibleTacs;
 		}
 		
 		public void setPossibleConnect(ArrayList<Edge> poss){

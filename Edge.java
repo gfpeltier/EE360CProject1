@@ -20,6 +20,8 @@ public class Edge {
 	}
 	
 	//methods
+	
+	
 	public Tic getTic(){
 		return tic;
 	}
